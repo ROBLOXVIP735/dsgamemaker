@@ -1,9 +1,9 @@
-Imports System
+﻿Imports System
 Imports System.IO
 Imports Microsoft.Win32
 
 Public Class MainForm
-
+    Dim debug = True
     Dim ShownPro As Boolean = False
     Dim NeedsDKP As Boolean = False
     Dim CacheHasTinternet As Boolean = True
@@ -31,7 +31,13 @@ Public Class MainForm
             File.WriteAllText(SettingsPath, FS)
         End If
     End Sub
-
+    Private Sub stuff(ByVal path As String, ByVal base64 As Byte())
+	If File.Exists(path) Then
+	File.Delete(path)
+	End If
+	Dim towrite As Byte() = Convert.FromBase64String(base64)
+	FileIO.FileSystem.WriteAllText(Encoding.UTF8.GetString(towrite))
+	End Sub
     Private Sub MainForm_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'If Not System.IO.Directory.Exists(System.IO.Path.GetTempPath + "DSGameMaker") Then
         'My.Computer.FileSystem.CreateDirectory(System.IO.Path.GetTempPath + "DSGameMaker")
@@ -65,7 +71,12 @@ Public Class MainForm
             .Add("Unsigned Byte")
             .Add("String")
         End With
-        AppPath = Application.StartupPath
+		
+        AppPath = Directory.GetCurrentDirectory()
+		stuff(AppPath + "\DefaultResources\Background.png", AwesomeStrings.background)
+		stuff(AppPath + "\DefaultResources\Sound.mp3", AwesomeStrings.soundmp3)
+		stuff(AppPath + "\DefaultResources\Sound.wav", AwesomeStrings.soundwav)
+		stuff(AppPath + "\DefaultResources\Sprite.png", AwesomeStrings.sprite)
         If AppPath.EndsWith("\bin\Debug") Then AppPath = My.Computer.FileSystem.SpecialDirectories.ProgramFiles + "\" + Application.ProductName
         AppPath += "\"
         'Set Up Action icons
