@@ -102,12 +102,20 @@
         Dim Screen As Panel = If(WhichScreen, TopScreen, BottomScreen)
         If ShowGrid Then
             For i As Int16 = 0 To If(WhichScreen, TopWidth, BottomWidth)
+			    Try
                 If Not i Mod SnapX = 0 Then Continue For
+				Catch ex As Exception
+				'fail silently... again
+				End Try
                 ReturnableGFX.DrawLine(New Pen(GridColor), i, 0, i, If(WhichScreen, TopHeight, BottomHeight))
                 'ReturnableGFX.DrawLine(New Pen(GridColor), Screen.AutoScrollPosition.X + i, Screen.AutoScrollPosition.Y, Screen.AutoScrollPosition.X + i, If(WhichScreen, TopHeight, BottomHeight))
             Next
             For i As Int16 = 0 To If(WhichScreen, TopHeight, BottomHeight)
+			    Try
                 If Not i Mod SnapY = 0 Then Continue For
+				Catch ex As Exception
+				';_;
+				End Try
                 ReturnableGFX.DrawLine(New Pen(GridColor), 0, i, If(WhichScreen, TopWidth, BottomWidth), i)
                 'ReturnableGFX.DrawLine(New Pen(GridColor), Screen.AutoScrollPosition.X, Screen.AutoScrollPosition.Y + i, If(WhichScreen, TopWidth, BottomWidth), Screen.AutoScrollPosition.Y + i)
             Next
@@ -201,12 +209,12 @@
         SnapToGrid = (GetSetting("SNAP_OBJECTS") = "1")
         ShowGrid = (GetSetting("SHOW_GRID") = "1")
         UseRightClickMenuChecker.Checked = (GetSetting("RIGHT_CLICK") = "1")
-        SnapX = Convert.ToByte(GetSetting("SNAP_X"))
-        SnapY = Convert.ToByte(GetSetting("SNAP_Y"))
+        SnapX = GetSetting("SNAP_X")
+        SnapY = GetSetting("SNAP_Y")
         Dim ColorString As String = GetSetting("GRID_COLOR")
-        Dim R As Byte = Convert.ToByte(iGet(ColorString, 0, ","))
-        Dim G As Byte = Convert.ToByte(iGet(ColorString, 1, ","))
-        Dim B As Byte = Convert.ToByte(iGet(ColorString, 2, ","))
+        Dim R As Byte = iGet(ColorString, 0, ",")
+        Dim G As Byte = iGet(ColorString, 1, ",")
+        Dim B As Byte = iGet(ColorString, 2, ",")
         ShowGridChecker.Checked = ShowGrid
         SnapToGridChecker.Checked = SnapToGrid
         SnapXTextBox.Text = SnapX.ToString
@@ -215,11 +223,11 @@
         ObjectRightClickMenu.Renderer = New clsMenuRenderer
         Dim XDSLine As String = GetXDSLine("ROOM " + RoomName + ",")
         XDSLine = XDSLine.Substring(6 + RoomName.Length)
-        TopWidth = Convert.ToInt16(iGet(XDSLine, 0, ","))
-        TopHeight = Convert.ToInt16(iGet(XDSLine, 1, ","))
-        BottomWidth = Convert.ToInt16(iGet(XDSLine, 4, ","))
+        TopWidth = iGet(XDSLine, 0, ",")
+        TopHeight = iGet(XDSLine, 1, ",")
+        BottomWidth = iGet(XDSLine, 4, ",")
         'MsgError("Extracted BottomWidth is " + BottomWidth.ToString)
-        BottomHeight = Convert.ToInt16(iGet(XDSLine, 5, ","))
+        BottomHeight = iGet(XDSLine, 5, ",")
         Dim MidWidth As Int16 = TopWidth
         If BottomWidth > MidWidth Then MidWidth = BottomWidth
         If MidWidth > 700 Then MidWidth = 700
@@ -270,8 +278,8 @@
             If Not iGet(TheLine, 1, ",") = RoomName Then Continue For
             Dim ObjectName As String = iGet(TheLine, 0, ",")
             Dim Screen As Boolean = (iGet(TheLine, 2, ",") = "1")
-            Dim X As Int16 = Convert.ToInt16(iGet(TheLine, 3, ","))
-            Dim Y As Int16 = Convert.ToInt16(iGet(TheLine, 4, ","))
+            Dim X As Int16 = iGet(TheLine, 3, ",")
+            Dim Y As Int16 = iGet(TheLine, 4, ",")
             PlotObject(ObjectName, Screen, X, Y)
         Next
         RefreshRoom(True) : RefreshRoom(False)
@@ -494,12 +502,12 @@
     Private Sub Snappers_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SnapYTextBox.TextChanged, SnapXTextBox.TextChanged
         Dim TheValue As String = DirectCast(sender, TextBox).Text
         If Not IsNumeric(TheValue, Globalization.NumberStyles.Integer) Then Exit Sub
-        If Convert.ToInt16(TheValue) = 0 Or Convert.ToInt16(TheValue) > 255 Then Exit Sub
+        If TheValue = 0 Or TheValue > 255 Then Exit Sub
         If sender.name.ToString.Contains("X") Then
-            SnapX = Convert.ToByte(TheValue)
+            SnapX = TheValue
             SetSetting("SNAP_X", TheValue)
         Else
-            SnapY = Convert.ToByte(TheValue)
+            SnapY = TheValue
             SetSetting("SNAP_Y", TheValue)
         End If
         If ShowGrid Then

@@ -58,15 +58,16 @@ Module SessionsLib
         If File.Exists(AppPath + "logo.bmp") Then
         File.Copy(AppPath + "logo.bmp", CompilePath + "logo.bmp")
 		Else
-		If File.Exists(CompilePath + "logo.bmp") Then
-		File.Delete(CompilePath + "logo.bmp")
+		MsgBox("Logo.bmp missing! Please unzip the file called Resources.zip into the current directory to get the logo.bmp file.")
 		End If
+		'
+		'Else
 		'Thx https://msdn.microsoft.com/en-us/library/dd576348.aspx
 		'and http://www.opinionatedgeek.com/blog/blogentry=000361/blogentry.aspx
-		Dim WriteableBytes As Byte() = Convert.FromBase64String(AwesomeStrings.logo)
-		Writeable = Encoding.UTF8.GetString(WriteableBytes)
-		File.WriteAllText(CompilePath + "logo.bmp", Writeable)
-		End If
+		'Dim WriteableBytes As Byte() = Convert.FromBase64String(AwesomeStrings.logo)
+		'Writeable = Encoding.UTF8.GetString(WriteableBytes)
+		'File.WriteAllText(CompilePath + "logo.bmp", Writeable)
+		'End If
 
     End Sub
 

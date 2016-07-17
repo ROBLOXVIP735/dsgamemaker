@@ -28,7 +28,8 @@ Module SettingsLib
         For i = 0 To SettingNames.Count - 1
             If SettingNames(i) = SettingName Then Return SettingValues(i)
         Next
-        Return String.Empty
+		'MsgBox("Warning: Setting " + SettingName + " not set!")
+        Return 0
     End Function
 
     Public Sub SetSetting(ByVal SettingName As String, ByVal SettingValue As String)

@@ -1,0 +1,11 @@
+TYPE 0
+DISPLAY Set xy and var xy
+ICON ObjectPosition.png
+CONDITION 0
+ARG X,0
+ARG Y,0
+ARG Var X,0
+ARG Var Y,0
+Set_XY(AppliesTo, !1!, !2!);
+!3! = !1!;
+!4! = !2!;

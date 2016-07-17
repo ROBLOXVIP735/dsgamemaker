@@ -91,15 +91,15 @@ Public Class MainForm
 		If Not Directory.Exists(AppPath + "\ActionIcons") Then
 		Directory.CreateDirectory(AppPath + "\ActionIcons")
 		End If
-		stuff(AppPath + "\DefaultResources\Background.png", AwesomeStrings.background)
-		stuff(AppPath + "\DefaultResources\Sound.mp3", AwesomeStrings.soundmp3)
-		stuff(AppPath + "\DefaultResources\Sound.wav", AwesomeStrings.soundwav)
-		stuff(AppPath + "\DefaultResources\Sprite.png", AwesomeStrings.sprite)
-		stuff(AppPath + "\Resources\NoSprite.png", AwesomeStrings.nosprite)
-		stuff(AppPath + "\ActionIcons\Empty.png", AwesomeStrings.empty)
-		stuff(AppPath + "\Actions.zip", AwesomeStrings.actions)
-		Dim MyBAT As String = "zip.exe x Actions.zip" + vbcrlf + "exit"
-        RunBatchString(MyBAT, AppPath, True)
+		'stuff(AppPath + "\DefaultResources\Background.png", AwesomeStrings.background)
+		'stuff(AppPath + "\DefaultResources\Sound.mp3", AwesomeStrings.soundmp3)
+		'stuff(AppPath + "\DefaultResources\Sound.wav", AwesomeStrings.soundwav)
+		'stuff(AppPath + "\DefaultResources\Sprite.png", AwesomeStrings.sprite)
+		'stuff(AppPath + "\Resources\NoSprite.png", AwesomeStrings.nosprite)
+		'stuff(AppPath + "\ActionIcons\Empty.png", AwesomeStrings.empty)
+		'stuff(AppPath + "\Actions.zip", AwesomeStrings.actions)
+		'Dim MyBAT As String = "zip.exe x Actions.zip" + vbcrlf + "exit"
+        'RunBatchString(MyBAT, AppPath, True)
 		If Not File.Exists(AppPath + "\zip.exe") Then
 		MsgBox("You do not have zip.exe. Please copy zip.exe to the folder DSGM is running in and restart the program.")
 		Exit Sub
@@ -157,8 +157,8 @@ Public Class MainForm
         For Each X As String In VitalFiles
             If Not File.Exists(X) Then VitalBuggered += 1
         Next
-        If VitalBuggered = 1 Then MsgError("A vital file is missing. You must reinstall " + Application.ProductName + ".") : Exit Sub
-        If VitalBuggered > 1 Then MsgError("Some vital files are missing. You must reinstall " + Application.ProductName + ".") : Exit Sub
+        If VitalBuggered = 1 Then MsgBox("File missing! Please unzip the file called Resources.zip into this directory to get the required file.") : Exit Sub
+        If VitalBuggered > 1 Then MsgBox("Files missing! Please unzip the file called Resources.zip into this directory to get all the required files.") : Exit Sub
         RebuildFontCache()
         'Toolstrip Renderers
         MainToolStrip.Renderer = New clsToolstripRenderer

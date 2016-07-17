@@ -1,0 +1,13 @@
+TYPE 3
+DISPLAY Draw and Clear Right
+ICON StringDraw.png
+CONDITION 0
+ARG Screen,1
+ARG Seconds,0
+ARG To write,0
+PA_OutputText(!1!, 1, 22, "!3!");
+for (DSGML = 0; DSGML <= (!2! * 60); DSGML++) {
+  PA_WaitForVBL();
+}
+//Draw_String("                                                            ", 1, 22);
+PA_OutputText(!1!, 1, 22, "                                                            ");

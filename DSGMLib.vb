@@ -169,24 +169,25 @@ Module DSGMlib
             Fonts.Add(FontName)
         Next
 		Catch ex As Exception
-		MsgBox("No fonts, building now")
-				If Not Directory.Exists(AppPath + "Fonts") Then
+		MsgBox("No fonts! Please unzip the file called Resources.zip into this directory to get all the fonts.")
+		Exit Sub
+		If Not Directory.Exists(AppPath + "Fonts") Then
 		Directory.CreateDirectory(AppPath + "Fonts")
 		End If
-		MainForm.stuff(AppPath + "Fonts/ComicSans.png", AwesomeStrings.Fonts.ComicSans)
-		MainForm.stuff(AppPath + "Fonts/Default.png", AwesomeStrings.Fonts._Default)
-		MainForm.stuff(AppPath + "Fonts/Italics.png", AwesomeStrings.Fonts.Italics)
-		MainForm.stuff(AppPath + "Fonts/MeltDown.png", AwesomeStrings.Fonts.MeltDown)
-		MainForm.stuff(AppPath + "Fonts/Pixel.png", AwesomeStrings.Fonts.Pixel)
-		MainForm.stuff(AppPath + "Fonts/Sleak.png", AwesomeStrings.Fonts.Sleak)
-		MainForm.stuff(AppPath + "Fonts/TimesNewRoman.png", AwesomeStrings.Fonts.TimesNewRoman)
-		MainForm.stuff(AppPath + "Fonts/TrebuchetMS.png", AwesomeStrings.Fonts.TrebuchetMS)
-		For Each X As String In Directory.GetFiles(AppPath + "Fonts")
-            If Not X.EndsWith(".png") Then Continue For
-            Dim FontName As String = X.Substring(X.LastIndexOf("\") + 1)
-            FontName = FontName.Substring(0, FontName.Length - 4)
-            Fonts.Add(FontName)
-        Next
+		'MainForm.stuff(AppPath + "Fonts/ComicSans.png", AwesomeStrings.Fonts.ComicSans)
+		'MainForm.stuff(AppPath + "Fonts/Default.png", AwesomeStrings.Fonts._Default)
+		'MainForm.stuff(AppPath + "Fonts/Italics.png", AwesomeStrings.Fonts.Italics)
+		'MainForm.stuff(AppPath + "Fonts/MeltDown.png", AwesomeStrings.Fonts.MeltDown)
+		'MainForm.stuff(AppPath + "Fonts/Pixel.png", AwesomeStrings.Fonts.Pixel)
+		'MainForm.stuff(AppPath + "Fonts/Sleak.png", AwesomeStrings.Fonts.Sleak)
+		'MainForm.stuff(AppPath + "Fonts/TimesNewRoman.png", AwesomeStrings.Fonts.TimesNewRoman)
+		'MainForm.stuff(AppPath + "Fonts/TrebuchetMS.png", AwesomeStrings.Fonts.TrebuchetMS)
+		'For Each X As String In Directory.GetFiles(AppPath + "Fonts")
+        '    If Not X.EndsWith(".png") Then Continue For
+        '    Dim FontName As String = X.Substring(X.LastIndexOf("\") + 1)
+        '    FontName = FontName.Substring(0, FontName.Length - 4)
+        '    Fonts.Add(FontName)
+        'Next
 		End Try
     End Sub
 
@@ -256,6 +257,9 @@ Module DSGMlib
     End Function
 
     Public Function CompileGame() As Boolean
+	If Not Directory.Exists(AppPath + "CompiledBINs") Then
+	Directory.CreateDirectory(AppPath + "CompiledBINs")
+	End If
         Compile.CustomPerformStep("Cleaning Temporary Data")
         File.Delete(CompilePath + "DSGMTemp" + Session + ".nds")
         For Each TheProcess As Process In Process.GetProcesses
@@ -412,10 +416,15 @@ Module DSGMlib
             End If
         Next
         If DoRAW Then
+		Try
             File.Copy(AppPath + "sox.exe", CompilePath + "data\sox.exe")
             File.Copy(AppPath + "libgomp-1.dll", CompilePath + "data\libgomp-1.dll")
             File.Copy(AppPath + "pthreadgc2.dll", CompilePath + "data\pthreadgc2.dll")
             File.Copy(AppPath + "zlib1.dll", CompilePath + "data\zlib1.dll")
+		Catch ex As Exception
+		MsgBox("Error copying libraries! Do you have sox.exe, libgomp-1.dll, pthreadgc2.dll and zlib1.dll in the same folder as the executable?")
+		Return False
+		End Try
             RunBatchString(RAWString, CompilePath + "data", False)
             File.Delete(CompilePath + "data\sox.exe")
             File.Delete(CompilePath + "data\libgomp-1.dll")
@@ -427,7 +436,12 @@ Module DSGMlib
             Next
         End If
         If DoMP3 Then
+		Try
             File.Copy(AppPath + "mp3enc.exe", CompilePath + "nitrofiles\mp3enc.exe")
+		Catch ex As Exception
+			MsgBox("Error copying mp3enc! Do you have it in the same folder as the executable?")
+			Return False
+		End Try
             RunBatchString(MP3String, CompilePath + "nitrofiles", False)
             For Each X As String In SoundsToRedo
                 If iGet(GetXDSLine("SOUND " + X + ","), 1, ",") = "0" Then Continue For
@@ -474,7 +488,7 @@ Module DSGMlib
         FinalString += "  DSGM_Init_PAlib();" + vbCrLf
         FinalString += "  Reset_Alarms();" + vbCrLf
         If GetXDSLine("NITROFS_CALL ").Substring(13) = "1" Then
-            FinalString += "  nitroFSInit(NULL);" + vbCrLf
+            FinalString += "  nitroFSInit();" + vbCrLf
             FinalString += "  chdir(""nitro:/"");" + vbCrLf
         End If
         If GetXDSLine("FAT_CALL ").Substring(9) = "1" Then
@@ -1010,7 +1024,7 @@ Module DSGMlib
         'FinalString += "  return true;" + vbcrlf
         'FinalString += "}" + vbcrlf + vbcrlf
         'File.WriteAllText(CompilePath + "gfx\PAGfx.ini", PAini)
-        File.WriteAllText(CompilePath + "source\main.c", FinalString)
+        File.WriteAllText(CompilePath + "source\main.c", FinalString.replace("nitroFSinit(NULL)", "nitroFSinit()"))
         Dim DefsString As String = String.Empty
         For Each XDSLine As String In GetXDSFilter("ROOM ")
             DefsString += "bool " + iGet(XDSLine.Substring(5), 0, ",") + "();" + vbCrLf
@@ -1392,20 +1406,21 @@ Module DSGMlib
     End Function
 
     Public Sub NOGBAShizzle()
-        If Convert.ToByte(GetSetting("USE_NOGBA")) = 1 Then
             If Not Directory.Exists(FormNOGBAPath()) Then
                 MsgError("NO$GBA was not found." + vbcrlf + vbcrlf + "Please reinstall " + Application.ProductName + ".")
+				If Not File.Exists(GetSetting("EMULATOR_PATH")) Then
+                MsgError("The selected Custom Emulator does not exist.")
+				Else
+				Diagnostics.Process.Start(GetSetting("EMULATOR_PATH"), CompilePath + "DSGMTemp" + Session + ".nds")
+				End If
                 Exit Sub
+				Else
+				Diagnostics.Process.Start(FormNOGBAPath() + "\NO$GBA.exe", CompilePath + "DSGMTemp" + Session + ".nds")
             End If
             'MsgError(CompilePath + GetXDSLine("PROJECTNAME ").ToString.Substring(12) + ".nds")
-            Diagnostics.Process.Start(FormNOGBAPath() + "\NO$GBA.exe", CompilePath + "DSGMTemp" + Session + ".nds")
-        Else
-            If Not File.Exists(GetSetting("EMULATOR_PATH")) Then
-                MsgError("The selected Custom Emulator does not exist.")
-                Exit Sub
-            End If
-            Diagnostics.Process.Start(GetSetting("EMULATOR_PATH"), CompilePath + "DSGMTemp" + Session + ".nds")
-        End If
+            
+            
+            
     End Sub
 
     Function HowManyChar(ByVal TheText As String, ByVal WhichChar As String) As Int16
@@ -1573,8 +1588,12 @@ Module DSGMlib
     End Function
 
     Function PathToImage(ByVal path As String) As Image
+	Try
         Dim imgData() As Byte = SafeGetFileData(path)
         Return New Bitmap(System.Drawing.Image.FromStream(New MemoryStream(imgData)))
+		Catch ex As Exception
+		Return New Bitmap(System.Drawing.Image.FromFile(AppPath + "DefaultResources/Sprite.png"))
+		End Try
     End Function
 
     Function SafeGetFileData(ByVal filePath As String) As Byte()
@@ -2081,12 +2100,11 @@ Module DSGMlib
 			.Text = ResourceName
 		End With
 		Try
-        MainForm.ResourcesTreeView.Nodes(ResourceID).Nodes.Add(MyNewNode) 'this line is bad
+        MainForm.ResourcesTreeView.Nodes(ResourceID).Nodes.Add(MyNewNode)
         MainForm.ResourcesTreeView.SelectedNode = MyNewNode
         If DoShowWindow Then OpenResource(ResourceName, ResourceID, True)
 		Catch ex As Exception
 		End Try
-		'===
     End Sub
 
     Function GetXDSLine(ByVal FilterString As String) As String
@@ -2134,7 +2152,7 @@ Module DSGMlib
             Dim TempArray() As String = InputString.Split(SeperatorChar)
             Return TempArray(ReturnableItem)
         Catch
-            Return String.Empty
+            Return 0
         End Try
     End Function
 
