@@ -1,8 +1,0 @@
-TYPE 5
-DISPLAY Print text on right side of screen
-ICON Empty.png
-CONDITION 0
-ARG scr,1
-ARG STRINQUOTES,4
-PA_OutputText(!1!, 1, 1, "     ");
-PA_OutputText(!1!, 1, 1, !2!);

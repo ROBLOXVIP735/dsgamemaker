@@ -1,6 +1,0 @@
-TYPE 5
-DISPLAY clear right text
-ICON Empty.png
-CONDITION 0
-ARG scr,1
-PA_OutputText(!1!, 1, 1, "                                                                                                                                                                                                                                                             ");

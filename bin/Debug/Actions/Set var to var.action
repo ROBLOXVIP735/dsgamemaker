@@ -1,7 +1,0 @@
-TYPE 2
-DISPLAY Set var !1! to var !2!
-ICON Variable.png
-CONDITION 0
-ARG Variable1,0
-ARG Variable2,0
-!1! = !2!;
