@@ -93,7 +93,7 @@ Public Class MainForm
         End If
         If Not File.Exists(AppPath + "devkitProUpdater-1.5.0.exe") Then
             If CacheHasTinternet Then
-                Dim ReqURL As String = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/murphy.php")
+                'Dim ReqURL As String = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/murphy.php")
                 'WC.DownloadFile(ReqURL, AppPath + "devkitProUpdater-1.5.0.exe")
                 'forget it
             End If
