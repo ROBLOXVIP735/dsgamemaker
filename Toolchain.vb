@@ -22,9 +22,13 @@ Module Toolchain
 
     Public Sub RundevkitProUpdater()
         MsgInfo("When presented with the option to choose components, select only 'devkitARM'.")
+		Try
         System.Diagnostics.Process.Start(AppPath + "devkitProUpdater-1.5.0.exe")
         Threading.Thread.Sleep(1000)
         MessageThing()
+		Catch ex As Exception
+		MsgBox("Updater failed. Please install devkitpro manually, or continue if it is already installed.")
+		End Try
     End Sub
 
     Public Sub ReinstallPAlib()

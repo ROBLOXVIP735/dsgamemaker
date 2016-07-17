@@ -1,5 +1,7 @@
 ﻿Imports System
 Imports System.IO
+Imports Microsoft.VisualBasic
+Imports System.Text
 Imports Microsoft.Win32
 
 Public Class MainForm
@@ -7,7 +9,7 @@ Public Class MainForm
     Dim ShownPro As Boolean = False
     Dim NeedsDKP As Boolean = False
     Dim CacheHasTinternet As Boolean = True
-
+    Dim forceclose = False
     Function ScriptArgumentStringToType(ByVal Type As String) As Byte
         If Type = "Integer" Then Return 0
         If Type = "Boolean" Then Return 1
@@ -31,12 +33,13 @@ Public Class MainForm
             File.WriteAllText(SettingsPath, FS)
         End If
     End Sub
-    Private Sub stuff(ByVal path As String, ByVal base64 As Byte())
+    Public Shared Sub stuff(ByVal path As String, ByVal base64 As String)
 	If File.Exists(path) Then
 	File.Delete(path)
 	End If
+	File.Create(path).Close()
 	Dim towrite As Byte() = Convert.FromBase64String(base64)
-	FileIO.FileSystem.WriteAllText(Encoding.UTF8.GetString(towrite))
+	File.WriteAllText(path, Encoding.UTF8.GetString(towrite))
 	End Sub
     Private Sub MainForm_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'If Not System.IO.Directory.Exists(System.IO.Path.GetTempPath + "DSGameMaker") Then
@@ -73,11 +76,35 @@ Public Class MainForm
         End With
 		
         AppPath = Directory.GetCurrentDirectory()
+		If Not File.Exists(AppPath + "\DS Game Maker.exe") Then
+		MsgBox("Please run DS Game Maker in the folder that the executable is in, and not remotely like from a command line. If the name of the executable is not DS Game Maker.exe, this error will trigger. Please rename the executable to DS Game Maker.exe if it is not already named that.")
+		forceclose = True
+		Me.Close()
+		End If
+		MsgBox("Current directory: " + AppPath)
+		If Not Directory.Exists(AppPath + "\DefaultResources") Then
+		Directory.CreateDirectory(AppPath + "\DefaultResources")
+		End If
+		If Not Directory.Exists(AppPath + "\Resources") Then
+		Directory.CreateDirectory(AppPath + "\Resources")
+		End If
+		If Not Directory.Exists(AppPath + "\ActionIcons") Then
+		Directory.CreateDirectory(AppPath + "\ActionIcons")
+		End If
 		stuff(AppPath + "\DefaultResources\Background.png", AwesomeStrings.background)
 		stuff(AppPath + "\DefaultResources\Sound.mp3", AwesomeStrings.soundmp3)
 		stuff(AppPath + "\DefaultResources\Sound.wav", AwesomeStrings.soundwav)
 		stuff(AppPath + "\DefaultResources\Sprite.png", AwesomeStrings.sprite)
-        If AppPath.EndsWith("\bin\Debug") Then AppPath = My.Computer.FileSystem.SpecialDirectories.ProgramFiles + "\" + Application.ProductName
+		stuff(AppPath + "\Resources\NoSprite.png", AwesomeStrings.nosprite)
+		stuff(AppPath + "\ActionIcons\Empty.png", AwesomeStrings.empty)
+		stuff(AppPath + "\Actions.zip", AwesomeStrings.actions)
+		Dim MyBAT As String = "zip.exe x Actions.zip" + vbcrlf + "exit"
+        RunBatchString(MyBAT, AppPath, True)
+		If Not File.Exists(AppPath + "\zip.exe") Then
+		MsgBox("You do not have zip.exe. Please copy zip.exe to the folder DSGM is running in and restart the program.")
+		Exit Sub
+		End If
+        'If AppPath.EndsWith("\bin\Debug") Then AppPath = My.Computer.FileSystem.SpecialDirectories.ProgramFiles + "\" + Application.ProductName
         AppPath += "\"
         'Set Up Action icons
         ActionBG = If(File.Exists(AppPath + "ActionBG.png"), PathToImage(AppPath + "ActionBG.png"), My.Resources.ActionBG)
@@ -161,7 +188,11 @@ Public Class MainForm
         Next
         'Settings
         If Not File.Exists(AppPath + "data.dat") Then
+		Try
             IO.File.Copy(AppPath + "restore.dat", AppPath + "data.dat")
+		Catch ex As Exception
+		IO.File.Create(AppPath + "data.dat").Close()
+		End Try
         End If
         SettingsPath = AppPath + "data.dat"
         PatchSetting("USE_EXTERNAL_SCRIPT_EDITOR", "0")
@@ -177,14 +208,14 @@ Public Class MainForm
         Next
         'PiracyWorks()
         If CacheHasTinternet Then
-            Dim Result As String = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/version.php")
-            UpdateVersion = Convert.ToInt16(Result)
-            Result = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/forcedupdate.php?id=" + IDVersion.ToString)
-            If Result.Length > 0 Then
-                MsgInfo("You are using a version of " + Application.ProductName + " that is widely pirated and therefore you must upgrade to the latest version as soon as possible." + vbCrLf + vbCrLf + "You will now be directed to the download page.")
-                URL("http://dsgamemaker.com/?dlchange")
-                End
-            End If
+            'Dim Result As String = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/version.php")
+            'UpdateVersion = Convert.ToInt16(Result)
+            'Result = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/forcedupdate.php?id=" + IDVersion.ToString)
+            'If Result.Length > 0 Then
+            '    MsgInfo("You are using a version of " + Application.ProductName + " that is widely pirated and therefore you must upgrade to the latest version as soon as possible." + vbCrLf + vbCrLf + "You will now be directed to the download page.")
+            '    URL("http://dsgamemaker.com/?dlchange")
+            '    End
+            'End If
         End If
         'IsPro = ReallyPro()
         'EquateProButton()
@@ -236,6 +267,7 @@ Public Class MainForm
     End Sub
 
     Private Sub MainForm_FormClosing(ByVal sender As System.Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+	If forceclose = False Then
         If BeingUsed Then
             Dim WillExit As Boolean = False
             Dim TheText As String = "Your new project"
@@ -255,6 +287,7 @@ Public Class MainForm
                 End If
             Catch : End Try
         End If
+	End If
     End Sub
 
     Public Sub InternalSave()
@@ -265,9 +298,13 @@ Public Class MainForm
         Dim MyBAT As String = "zip.exe a save.zip Sprites Backgrounds Sounds Scripts IncludeFiles NitroFSFiles XDS.xds" + vbCrLf + "exit"
         RunBatchString(MyBAT, SessionPath, True)
         'File.Delete(ProjectPath)
+		Try
         File.Copy(SessionPath + "save.zip", ProjectPath, True)
         File.Delete(SessionPath + "save.bat")
         File.Delete(SessionPath + "save.zip")
+		Catch ex As Exception
+		'fail silently
+		End Try
         SaveButton.Enabled = True
         SaveButtonTool.Enabled = True
     End Sub
@@ -343,8 +380,8 @@ Public Class MainForm
         Dim RoomCount As Byte = GetXDSFilter("ROOM ").Length
         If Not IsPro And RoomCount >= 5 Then ProPlease("use more than 5 Rooms") : Exit Sub
         Dim NewName As String = MakeResourceName("Room", "ROOM")
-        Dim DW As Int16 = Convert.ToInt16(256)
-        Dim DH As Int16 = Convert.ToInt16(192)
+        Dim DW As Int16 = "256"
+        Dim DH As Int16 = "192"
         If DW < 256 Then DW = 256
         If DW > 4096 Then DW = 4096
         If DW < 192 Then DW = 192
@@ -592,9 +629,9 @@ Public Class MainForm
             RundevkitProUpdater()
         End If
         If Not IsPro Then
-            If HasInternetConnection("http://dsgamemaker.com") Then
-                If Not ShownPro Then Pro.ShowDialog() : ShownPro = True
-            End If
+                Pro.ShowDialog()
+		Else
+				MsgBox("You have pro!")
         End If
         Dim SkipAuto As Boolean = False
         Dim Args As New List(Of String)
@@ -632,7 +669,9 @@ Public Class MainForm
             RedoSprites = True
             BGsToRedo.Clear()
             AddResourceNode(ResourceIDs.Room, "Room_1", "RoomNode", False)
-            InternalSave()
+            'InternalSave()
+			'don't save at the beginning, there is no file yet
+			
             'If CacheHasTinternet And GetSetting("SHOW_NEWS") = "1" Then
             '    Newsline.Location = New Point(24, 24)
             '    ShowInternalForm(Newsline)

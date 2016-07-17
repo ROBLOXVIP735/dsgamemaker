@@ -51,17 +51,17 @@ Partial Class Pro
         Me.EnterSerialButton.Text = "Enter Serial..."
         Me.EnterSerialButton.UseVisualStyleBackColor = True
         '
-        'BuyProButton
+        'this was all programmed in Programmer's Notepad because VS is broken, some of this script was copied from Script.Designer.vb
         '
-        Me.BuyProButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.BuyProButton.Font = New System.Drawing.Font("Tahoma", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BuyProButton.Location = New System.Drawing.Point(6, 317)
-        Me.BuyProButton.Name = "BuyProButton"
-        Me.BuyProButton.Size = New System.Drawing.Size(326, 32)
-        Me.BuyProButton.TabIndex = 2
-        Me.BuyProButton.Text = "Buy Pro ($14.99 for Lifetime license)"
-        Me.BuyProButton.UseVisualStyleBackColor = True
-        '
+		Me.HavePro.AutoSize = True
+        Me.HavePro.CheckAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.HavePro.Location = New System.Drawing.Point(6, 317)
+        Me.HavePro.Name = "HavePro"
+        Me.HavePro.Size = New System.Drawing.Size(87, 17)
+        Me.HavePro.TabIndex = 6
+        Me.HavePro.Text = "Pro"
+        Me.HavePro.UseVisualStyleBackColor = True
+		'
         'MainInfoLabel
         '
         Me.MainInfoLabel.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -94,7 +94,7 @@ Partial Class Pro
         Me.ClientSize = New System.Drawing.Size(338, 387)
         Me.Controls.Add(Me.MainSalesLabel)
         Me.Controls.Add(Me.MainInfoLabel)
-        Me.Controls.Add(Me.BuyProButton)
+        Me.Controls.Add(Me.HavePro)
         Me.Controls.Add(Me.EnterSerialButton)
         Me.Controls.Add(Me.CloseButton)
         Me.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -113,4 +113,5 @@ Partial Class Pro
     Friend WithEvents BuyProButton As System.Windows.Forms.Button
     Friend WithEvents MainInfoLabel As System.Windows.Forms.Label
     Friend WithEvents MainSalesLabel As System.Windows.Forms.Label
+	Friend WithEvents HavePro As System.Windows.Forms.CheckBox
 End Class

@@ -46,4 +46,8 @@
     Private Sub Pro_Activated(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Activated
         If IsPro Then BuyProButton.Focus() Else CloseButton.Focus()
     End Sub
+	Private Sub HavePro_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles HavePro.CheckedChanged
+	    IsPro = HavePro.Checked
+		MsgBox("Done :)")
+	End Sub
 End Class

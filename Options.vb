@@ -88,8 +88,8 @@ Public Class Options
             UseInternalScriptEditorRadioButton.Checked = True
         End If
         ScriptEditorTextBox.Text = GetSetting("SCRIPT_EDITOR_PATH")
-        DefaultRoomWidthTB.Text = GetSetting("DEFAULT_ROOM_WIDTH")
-        DefaultRoomHeightTB.Text = GetSetting("DEFAULT_ROOM_HEIGHT")
+        DefaultRoomWidthTB.Text = "unused"
+        DefaultRoomHeightTB.Text = "unused"
         HideOldActionsChecker.Checked = (GetSetting("HIDE_OLD_ACTIONS") = "1")
         ShrinkActionsListChecker.Checked = (GetSetting("SHRINK_ACTIONS_LIST") = "1")
     End Sub

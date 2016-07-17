@@ -137,27 +137,7 @@ Module DSGMlib
     End Function
 
     Function ReallyPro() As Boolean
-        Dim Email As String = GetSetting("PRO_EMAIL")
-        Dim Serial As String = GetSetting("PRO_SERIAL")
-        Dim UserPro As Boolean = If(Convert.ToByte(GetSetting("PRO")) = 1, True, False)
-        If Not UserPro = My.Settings.ProActivated Then UserPro = My.Settings.ProActivated
-        If Not UserPro Then Return False
-        If Not Email = My.Settings.ProEmail Then Email = My.Settings.ProEmail
-        If Not Serial = My.Settings.ProSerial Then Serial = My.Settings.ProSerial
-        If UserPro Then
-            'Okay, using Pro... let's check those details baby
-            If HasInternetConnection(Domain) Then
-                Dim Request As String = Domain + "DSGM5RegClient/key.php?data1=" + Email + "&data2=" + Serial
-                Dim Response As String = WC.DownloadString(Request)
-                If Response = "0" Then Return False
-                WC.Dispose()
-                Return True
-            Else
-                If Not Email.Contains("@") Then Return False
-                If Not Serial.StartsWith("DSGM") Then Return False
-                Return True
-            End If
-        End If
+        Return True 'legitness
     End Function
 
     Public Function SQLSanitize(ByVal InputData As String, ByVal AlsoSpaces As Boolean) As String
@@ -181,12 +161,33 @@ Module DSGMlib
 
     Sub RebuildFontCache()
         Fonts.Clear()
+		Try
         For Each X As String In Directory.GetFiles(AppPath + "Fonts")
             If Not X.EndsWith(".png") Then Continue For
             Dim FontName As String = X.Substring(X.LastIndexOf("\") + 1)
             FontName = FontName.Substring(0, FontName.Length - 4)
             Fonts.Add(FontName)
         Next
+		Catch ex As Exception
+		MsgBox("No fonts, building now")
+				If Not Directory.Exists(AppPath + "Fonts") Then
+		Directory.CreateDirectory(AppPath + "Fonts")
+		End If
+		MainForm.stuff(AppPath + "Fonts/ComicSans.png", AwesomeStrings.Fonts.ComicSans)
+		MainForm.stuff(AppPath + "Fonts/Default.png", AwesomeStrings.Fonts._Default)
+		MainForm.stuff(AppPath + "Fonts/Italics.png", AwesomeStrings.Fonts.Italics)
+		MainForm.stuff(AppPath + "Fonts/MeltDown.png", AwesomeStrings.Fonts.MeltDown)
+		MainForm.stuff(AppPath + "Fonts/Pixel.png", AwesomeStrings.Fonts.Pixel)
+		MainForm.stuff(AppPath + "Fonts/Sleak.png", AwesomeStrings.Fonts.Sleak)
+		MainForm.stuff(AppPath + "Fonts/TimesNewRoman.png", AwesomeStrings.Fonts.TimesNewRoman)
+		MainForm.stuff(AppPath + "Fonts/TrebuchetMS.png", AwesomeStrings.Fonts.TrebuchetMS)
+		For Each X As String In Directory.GetFiles(AppPath + "Fonts")
+            If Not X.EndsWith(".png") Then Continue For
+            Dim FontName As String = X.Substring(X.LastIndexOf("\") + 1)
+            FontName = FontName.Substring(0, FontName.Length - 4)
+            Fonts.Add(FontName)
+        Next
+		End Try
     End Sub
 
     Sub OpenResource(ByVal ResourceName As String, ByVal ResourceType As Byte, ByVal SpriteDataChanged As Boolean)
@@ -2073,15 +2074,19 @@ Module DSGMlib
 
     Sub AddResourceNode(ByRef ResourceID As Byte, ByVal ResourceName As String, ByVal NodeType As String, ByVal DoShowWindow As Boolean)
         Dim MyNewNode As New TreeNode
-        With MyNewNode
-            .Name = NodeType
-            .ImageIndex = ResourceID
-            .SelectedImageIndex = ResourceID
-            .Text = ResourceName
-        End With
-        MainForm.ResourcesTreeView.Nodes(ResourceID).Nodes.Add(MyNewNode)
+		With MyNewNode
+			.Name = NodeType
+			.ImageIndex = ResourceID
+			.SelectedImageIndex = ResourceID
+			.Text = ResourceName
+		End With
+		Try
+        MainForm.ResourcesTreeView.Nodes(ResourceID).Nodes.Add(MyNewNode) 'this line is bad
         MainForm.ResourcesTreeView.SelectedNode = MyNewNode
         If DoShowWindow Then OpenResource(ResourceName, ResourceID, True)
+		Catch ex As Exception
+		End Try
+		'===
     End Sub
 
     Function GetXDSLine(ByVal FilterString As String) As String
@@ -2134,8 +2139,8 @@ Module DSGMlib
     End Function
 
     Public Sub ClearResourcesTreeView()
-        For NodeNo As Byte = 0 To MainForm.ResourcesTreeView.Nodes.Count - 1
-            MainForm.ResourcesTreeView.Nodes(NodeNo).Nodes.Clear()
+        For i = 0 To MainForm.ResourcesTreeView.Nodes.Count - 1
+            MainForm.ResourcesTreeView.Nodes(i).Nodes.Clear()
         Next
     End Sub
 
@@ -2243,7 +2248,11 @@ Module DSGMlib
         BGsToRedo.Clear()
         FontsUsedLastTime.Clear()
         BuildSoundsRedoFromFile()
+		Try
         SetSetting("LAST_PROJECT", Result)
+		Catch ex As Exception
+		'fail silently
+		End Try
         SaveSettings()
     End Sub
 
@@ -2342,7 +2351,7 @@ Module DSGMlib
     End Function
 
     Sub RunBatchString(ByVal BatchString As String, ByVal WorkingDirectory As String, ByVal is7Zip As Boolean)
-        If is7Zip Then File.Copy(AppPath + "zip.exe", WorkingDirectory + "zip.exe", True)
+        If is7Zip Then File.Copy(AppPath + "\zip.exe", WorkingDirectory + "zip.exe", True)
         File.WriteAllText(WorkingDirectory + "\DSGMBatch.bat", BatchString)
         'MsgError(WorkingDirectory + "DSGMBatch.bat")
         Dim MyProcess As New Process

@@ -92,6 +92,8 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AwesomeStrings.vb">
+	</Compile>
     <Compile Include="AboutDSGM.Designer.vb">
       <DependentUpon>AboutDSGM.vb</DependentUpon>
     </Compile>
