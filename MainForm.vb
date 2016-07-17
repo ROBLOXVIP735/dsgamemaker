@@ -1,4 +1,4 @@
-﻿Imports System
+Imports System
 Imports System.IO
 Imports Microsoft.Win32
 
@@ -76,7 +76,7 @@ Public Class MainForm
             If TypeOf ctl Is MdiClient Then ctl.BackgroundImage = My.Resources.MDIBG
         Next ctl
         Dim System32Path As String = Environment.GetFolderPath(Environment.SpecialFolder.System)
-        CacheHasTinternet = HasInternetConnection("http://invisionsoft.co.uk")
+        CacheHasTinternet = True
         If Not File.Exists(System32Path + "\SciLexer.dll") Then
             File.Copy(AppPath + "SciLexer.dll", System32Path + "\SciLexer.dll")
         End If
@@ -94,14 +94,15 @@ Public Class MainForm
         If Not File.Exists(AppPath + "devkitProUpdater-1.5.0.exe") Then
             If CacheHasTinternet Then
                 Dim ReqURL As String = WC.DownloadString("http://dsgamemaker.com/DSGM5RegClient/murphy.php")
-                WC.DownloadFile(ReqURL, AppPath + "devkitProUpdater-1.5.0.exe")
+                'WC.DownloadFile(ReqURL, AppPath + "devkitProUpdater-1.5.0.exe")
+                'forget it
             End If
         End If
         Try
             SetFileType(".dsgm", "DSGMFile")
             SetFileDescription("DSGMFile", Application.ProductName + " Project")
             AddAction("DSGMFile", "open", "Open")
-            SetExtensionCommandLine("open", "DSGMFile", """" + AppPath + Application.ProductName + ".exe"" ""%1""")
+            SetExtensionCommandLine("open", "DSGMFile", """" + AppPath + Application.ProductName + ".exe"" ""%1""G")
             SetDefaultIcon("DSGMFile", """" + AppPath + "Icon.ico""")
         Catch ex As Exception
             MsgWarn("You should run " + Application.ProductName + " as an Administrator." + vbCrLf + vbCrLf + "(" + ex.Message + ")")
@@ -190,8 +191,8 @@ Public Class MainForm
     'End Sub
 
     Sub GenerateShite(ByVal DisplayResult As String)
-        Dim DW As Int16 = Convert.ToInt16(GetSetting("DEFAULT_ROOM_WIDTH"))
-        Dim DH As Int16 = Convert.ToInt16(GetSetting("DEFAULT_ROOM_HEIGHT"))
+        Dim DW As Int16 = Convert.ToInt16(256)
+        Dim DH As Int16 = Convert.ToInt16(192)
 
 
 
@@ -331,8 +332,8 @@ Public Class MainForm
         Dim RoomCount As Byte = GetXDSFilter("ROOM ").Length
         If Not IsPro And RoomCount >= 5 Then ProPlease("use more than 5 Rooms") : Exit Sub
         Dim NewName As String = MakeResourceName("Room", "ROOM")
-        Dim DW As Int16 = Convert.ToInt16(GetSetting("DEFAULT_ROOM_WIDTH"))
-        Dim DH As Int16 = Convert.ToInt16(GetSetting("DEFAULT_ROOM_HEIGHT"))
+        Dim DW As Int16 = Convert.ToInt16(256)
+        Dim DH As Int16 = Convert.ToInt16(192)
         If DW < 256 Then DW = 256
         If DW > 4096 Then DW = 4096
         If DW < 192 Then DW = 192
@@ -369,14 +370,16 @@ Public Class MainForm
     End Sub
 
     Sub LoadLastProject(ByVal Automatic As Boolean)
+	    Dim LastPath As String = "Placeholder :)"
+		Exit Sub
         'IsNewProject = False
-        Dim LastPath As String = GetSetting("LAST_PROJECT")
-        If Automatic Then
-            If File.Exists(LastPath) Then
-                OpenProject(LastPath)
-            End If
-            Exit Sub
-        End If
+        'Dim LastPath As String = GetSetting("LAST_PROJECT")
+        'If Automatic Then
+         '   If File.Exists(LastPath) Then
+          '      OpenProject(LastPath)
+          'End If
+            'Exit Sub
+        'End If
         If BeingUsed Then
             If LastPath = ProjectPath Then
                 'Same Project - Reload job
@@ -595,10 +598,10 @@ Public Class MainForm
             BlankNew = False
         Else
             If Not SkipAuto Then
-                If Convert.ToByte(GetSetting("OPEN_LAST_PROJECT_STARTUP")) = 1 Then
-                    LoadLastProject(True)
-                    BlankNew = False
-                End If
+                'If Convert.ToByte(GetSetting("OPEN_LAST_PROJECT_STARTUP")) = 1 Then
+                '    LoadLastProject(True)
+                '    BlankNew = False
+                'End If
             End If
         End If
         If BlankNew Then
@@ -619,10 +622,10 @@ Public Class MainForm
             BGsToRedo.Clear()
             AddResourceNode(ResourceIDs.Room, "Room_1", "RoomNode", False)
             InternalSave()
-            If CacheHasTinternet And GetSetting("SHOW_NEWS") = "1" Then
-                Newsline.Location = New Point(24, 24)
-                ShowInternalForm(Newsline)
-            End If
+            'If CacheHasTinternet And GetSetting("SHOW_NEWS") = "1" Then
+            '    Newsline.Location = New Point(24, 24)
+            '    ShowInternalForm(Newsline)
+            'End If
         End If
     End Sub
 
